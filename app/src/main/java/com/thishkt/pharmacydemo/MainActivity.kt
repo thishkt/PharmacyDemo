@@ -1,10 +1,12 @@
 package com.thishkt.pharmacydemo
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.*
+import org.json.JSONArray
+import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,9 +40,29 @@ class MainActivity : AppCompatActivity() {
             override fun onResponse(call: Call, response: Response) {
                 val pharmaciesData = response.body?.string()
 
-                runOnUiThread{
-                    //將 Okhttp 獲取到的回應值，指定到畫面的 TextView 元件中
-                    tv_pharmacies_data.text = pharmaciesData
+                //將 pharmaciesData 整包字串資料，轉成 JSONObject 格式
+                val obj = JSONObject(pharmaciesData)
+
+                //features 是一個陣列 [] ，需要將他轉換成 JSONArray
+                val featuresArray = JSONArray(obj.getString("features"))
+
+
+                //藥局名稱變數宣告
+//                var propertiesName: String = ""
+                val propertiesName = StringBuilder()
+                //透過 for 迴圈，即可以取出所有的藥局名稱
+                for (i in 0 until featuresArray.length()) {
+                    val properties = featuresArray.getJSONObject(i).getString("properties")
+                    val propertieObj = JSONObject(properties)
+
+                    //將每次獲取到的藥局名稱，多加跳行符號，存到變數中
+//                    propertiesName += propertiesName + propertieObj.getString("name") + "\n"
+                    propertiesName.append(propertieObj.getString("name") + "\n")
+                }
+
+                runOnUiThread {
+                    //最後取得所有藥局名稱資料，指定顯示到 TextView 元件中
+                    tv_pharmacies_data.text = propertiesName
                 }
             }
         })
