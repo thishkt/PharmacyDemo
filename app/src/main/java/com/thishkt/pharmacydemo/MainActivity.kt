@@ -4,6 +4,9 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.thishkt.pharmacydemo.Util.OkHttpUtil
 import com.thishkt.pharmacydemo.Util.OkHttpUtil.Companion.mOkHttpUtil
@@ -14,12 +17,41 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
+
+    //定義全域變數
+    private lateinit var viewAdapter: MainAdapter
+    private lateinit var viewManager: RecyclerView.LayoutManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        initView()
+
         getPharmacyData()
 
+    }
+
+    private fun initView() {
+        // 定義 LayoutManager 為 LinearLayoutManager
+        viewManager = LinearLayoutManager(this)
+
+        // 自定義 Adapte 為 MainAdapter，稍後再定義 MainAdapter 這個類別
+        viewAdapter = MainAdapter()
+
+        // 定義從佈局當中，拿到 recycler_view 元件，
+        recycler_view.apply {
+            // 透過 kotlin 的 apply 語法糖，設定 LayoutManager 和 Adapter
+            layoutManager = viewManager
+            adapter = viewAdapter
+
+            addItemDecoration(
+                DividerItemDecoration(
+                    this@MainActivity,
+                    DividerItemDecoration.VERTICAL
+                )
+            )
+        }
     }
 
     private fun getPharmacyData() {
@@ -28,19 +60,13 @@ class MainActivity : AppCompatActivity() {
 
         mOkHttpUtil.getAsync(PHARMACIES_DATA_URL, object : OkHttpUtil.ICallback {
             override fun onResponse(response: Response) {
-                //藥局名稱變數宣告
-                var propertiesName = StringBuilder()
-
                 val pharmaciesData = response.body?.string()
 
                 val pharmacyInfo = Gson().fromJson(pharmaciesData, PharmacyInfo::class.java)
 
-                for (i in pharmacyInfo.features) {
-                    propertiesName.append(i.property.name + "\n")
-                }
-
                 runOnUiThread {
-                    tv_pharmacies_data.text = propertiesName
+                    //將下載的口罩資料，指定給 MainAdapter
+                    viewAdapter.pharmacyList = pharmacyInfo.features
 
                     //關閉忙碌圈圈
                     progressBar.visibility = View.GONE
