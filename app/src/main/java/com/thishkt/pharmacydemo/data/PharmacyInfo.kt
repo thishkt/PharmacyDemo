@@ -14,5 +14,12 @@ class Feature(
 
 class Property(
     @SerializedName("name")
-    val name: String
+    val name: String,
+
+    @SerializedName("mask_adult")
+    val mask_adult: String,
+
+    @SerializedName("mask_child")
+    val mask_child: String
+
 )

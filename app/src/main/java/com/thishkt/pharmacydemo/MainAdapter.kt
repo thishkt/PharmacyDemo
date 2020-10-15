@@ -26,6 +26,8 @@ class MainAdapter :
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         holder.tvName.text = pharmacyList[position].property.name
+        holder.tvAdultAmount.text = pharmacyList[position].property.mask_adult
+        holder.tvChildAmount.text = pharmacyList[position].property.mask_child
     }
 
     override fun getItemCount(): Int {
@@ -34,6 +36,8 @@ class MainAdapter :
 
     class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvName: TextView = itemView.findViewById(R.id.tv_name)
+        val tvAdultAmount: TextView = itemView.findViewById(R.id.tv_adult_amount)
+        val tvChildAmount: TextView = itemView.findViewById(R.id.tv_child_amount)
     }
 
 }
