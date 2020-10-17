@@ -1,5 +1,6 @@
 package com.thishkt.pharmacydemo
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -10,13 +11,12 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
 import com.thishkt.pharmacydemo.Util.OkHttpUtil
 import com.thishkt.pharmacydemo.Util.OkHttpUtil.Companion.mOkHttpUtil
+import com.thishkt.pharmacydemo.data.Feature
 import com.thishkt.pharmacydemo.data.PharmacyInfo
 import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.*
-import org.json.JSONArray
-import org.json.JSONObject
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), MainAdapter.IItemClickListener {
 
     //定義全域變數
     private lateinit var viewAdapter: MainAdapter
@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         viewManager = LinearLayoutManager(this)
 
         // 自定義 Adapte 為 MainAdapter，稍後再定義 MainAdapter 這個類別
-        viewAdapter = MainAdapter()
+        viewAdapter = MainAdapter(this)
 
         // 定義從佈局當中，拿到 recycler_view 元件，
         recycler_view.apply {
@@ -81,4 +81,12 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
+
+    override fun onItemClickListener(data: Feature) {
+        val intent = Intent(this, PharmacyDetailActivity::class.java)
+        intent.putExtra("data",data)
+        startActivity(intent)
+    }
+
+
 }

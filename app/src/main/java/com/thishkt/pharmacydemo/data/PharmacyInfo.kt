@@ -1,16 +1,17 @@
 package com.thishkt.pharmacydemo.data
 
 import com.google.gson.annotations.SerializedName
+import java.io.Serializable
 
 class PharmacyInfo(
     @SerializedName("features")
     val features: List<Feature>
-)
+):Serializable
 
 class Feature(
     @SerializedName("properties")
     val property: Property
-)
+):Serializable
 
 class Property(
     @SerializedName("name")
@@ -22,4 +23,4 @@ class Property(
     @SerializedName("mask_child")
     val mask_child: String
 
-)
+):Serializable
