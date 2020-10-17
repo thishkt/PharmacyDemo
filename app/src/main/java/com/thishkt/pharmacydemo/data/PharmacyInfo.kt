@@ -6,12 +6,12 @@ import java.io.Serializable
 class PharmacyInfo(
     @SerializedName("features")
     val features: List<Feature>
-):Serializable
+) : Serializable
 
 class Feature(
     @SerializedName("properties")
     val property: Property
-):Serializable
+) : Serializable
 
 class Property(
     @SerializedName("name")
@@ -21,6 +21,12 @@ class Property(
     val mask_adult: String,
 
     @SerializedName("mask_child")
-    val mask_child: String
+    val mask_child: String,
 
-):Serializable
+    @SerializedName("phone")
+    val phone: String,
+
+    @SerializedName("address")
+    val address: String
+
+) : Serializable
