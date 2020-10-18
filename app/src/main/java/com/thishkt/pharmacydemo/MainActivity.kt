@@ -4,15 +4,20 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
-import com.thishkt.pharmacydemo.Util.OkHttpUtil
-import com.thishkt.pharmacydemo.Util.OkHttpUtil.Companion.mOkHttpUtil
+import com.thishkt.pharmacydemo.util.OkHttpUtil
+import com.thishkt.pharmacydemo.util.OkHttpUtil.Companion.mOkHttpUtil
 import com.thishkt.pharmacydemo.data.Feature
 import com.thishkt.pharmacydemo.data.PharmacyInfo
+import com.thishkt.pharmacydemo.util.CountyUtil
+import com.thishkt.pharmacydemo.util.CountyUtil.getCountyIndexByName
+import com.thishkt.pharmacydemo.util.CountyUtil.getTownIndexByName
 import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.*
 
@@ -21,6 +26,12 @@ class MainActivity : AppCompatActivity(), MainAdapter.IItemClickListener {
     //定義全域變數
     private lateinit var viewAdapter: MainAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
+    private var pharmacyInfo: PharmacyInfo? = null
+
+    //預設名稱
+    private var currentCounty: String = "臺東縣"
+    private var currentTown: String = "池上鄉"
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,6 +44,47 @@ class MainActivity : AppCompatActivity(), MainAdapter.IItemClickListener {
     }
 
     private fun initView() {
+        val adapterCounty =
+            ArrayAdapter(
+                this,
+                android.R.layout.simple_spinner_dropdown_item,
+                CountyUtil.getAllCountiesName()
+            )
+        spinnerCounty.adapter = adapterCounty
+        spinnerCounty.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+            }
+
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                currentCounty = spinnerCounty.selectedItem.toString()
+                setSpinnerTown()
+            }
+        }
+        spinnerTown.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+            }
+
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                currentTown = spinnerTown.selectedItem.toString()
+                if (pharmacyInfo != null) {
+                    updateRecyclerView()
+                }
+            }
+        }
+        setDefaultCountyWithTown()
+
+
         // 定義 LayoutManager 為 LinearLayoutManager
         viewManager = LinearLayoutManager(this)
 
@@ -54,6 +106,22 @@ class MainActivity : AppCompatActivity(), MainAdapter.IItemClickListener {
         }
     }
 
+    private fun setDefaultCountyWithTown() {
+        spinnerCounty.setSelection(getCountyIndexByName(currentCounty))
+        setSpinnerTown()
+    }
+
+    private fun setSpinnerTown() {
+        val adapterTown =
+            ArrayAdapter(
+                this,
+                android.R.layout.simple_spinner_dropdown_item,
+                CountyUtil.getTownsByCountyName(currentCounty)
+            )
+        spinnerTown.adapter = adapterTown
+        spinnerTown.setSelection(getTownIndexByName(currentCounty, currentTown))
+    }
+
     private fun getPharmacyData() {
         //顯示忙碌圈圈
         progressBar.visibility = View.VISIBLE
@@ -62,11 +130,11 @@ class MainActivity : AppCompatActivity(), MainAdapter.IItemClickListener {
             override fun onResponse(response: Response) {
                 val pharmaciesData = response.body?.string()
 
-                val pharmacyInfo = Gson().fromJson(pharmaciesData, PharmacyInfo::class.java)
+                pharmacyInfo = Gson().fromJson(pharmaciesData, PharmacyInfo::class.java)
 
                 runOnUiThread {
-                    //將下載的口罩資料，指定給 MainAdapter
-                    viewAdapter.pharmacyList = pharmacyInfo.features
+
+                    updateRecyclerView()
 
                     //關閉忙碌圈圈
                     progressBar.visibility = View.GONE
@@ -82,9 +150,21 @@ class MainActivity : AppCompatActivity(), MainAdapter.IItemClickListener {
         })
     }
 
+    private fun updateRecyclerView() {
+
+        val filterData =
+            pharmacyInfo?.features?.filter {
+                it.property.county == currentCounty && it.property.town == currentTown
+            }
+
+        if (filterData != null) {
+            viewAdapter.pharmacyList = filterData
+        }
+    }
+
     override fun onItemClickListener(data: Feature) {
         val intent = Intent(this, PharmacyDetailActivity::class.java)
-        intent.putExtra("data",data)
+        intent.putExtra("data", data)
         startActivity(intent)
     }
 

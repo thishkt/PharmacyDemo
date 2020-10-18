@@ -1,4 +1,4 @@
-package com.thishkt.pharmacydemo.Util
+package com.thishkt.pharmacydemo.util
 
 import okhttp3.*
 import okio.IOException

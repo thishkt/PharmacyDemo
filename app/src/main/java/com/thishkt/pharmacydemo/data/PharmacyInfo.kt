@@ -27,6 +27,13 @@ class Property(
     val phone: String,
 
     @SerializedName("address")
-    val address: String
+    val address: String,
+
+    @SerializedName("county")
+    val county: String,
+
+    @SerializedName("town")
+    val town: String
+
 
 ) : Serializable
