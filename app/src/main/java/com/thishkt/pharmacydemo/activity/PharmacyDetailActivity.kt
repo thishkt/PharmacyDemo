@@ -1,10 +1,8 @@
-package com.thishkt.pharmacydemo
+package com.thishkt.pharmacydemo.activity
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import com.thishkt.pharmacydemo.R
 import com.thishkt.pharmacydemo.data.Feature
 import kotlinx.android.synthetic.main.activity_pharmacy_detail.*
 

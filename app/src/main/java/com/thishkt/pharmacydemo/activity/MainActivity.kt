@@ -1,4 +1,4 @@
-package com.thishkt.pharmacydemo
+package com.thishkt.pharmacydemo.activity
 
 import android.content.Intent
 import android.os.Bundle
@@ -11,6 +11,9 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.gson.Gson
+import com.thishkt.pharmacydemo.adapter.MainAdapter
+import com.thishkt.pharmacydemo.PHARMACIES_DATA_URL
+import com.thishkt.pharmacydemo.R
 import com.thishkt.pharmacydemo.util.OkHttpUtil
 import com.thishkt.pharmacydemo.util.OkHttpUtil.Companion.mOkHttpUtil
 import com.thishkt.pharmacydemo.data.Feature
