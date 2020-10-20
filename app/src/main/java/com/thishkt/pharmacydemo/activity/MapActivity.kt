@@ -8,6 +8,10 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
 import com.thishkt.pharmacydemo.R
 import com.thishkt.pharmacydemo.REQUEST_LOCATION_PERMISSION
 
@@ -30,6 +34,28 @@ class MapActivity : AppCompatActivity() {
             //已獲取到權限
             //todo 獲取經緯度
             Toast.makeText(this, "已獲取到位置權限，可以準備開始獲取經緯度", Toast.LENGTH_SHORT).show()
+
+            val mLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
+
+            val locationRequest = LocationRequest()
+            locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            //更新頻率
+            locationRequest.interval = 1000
+            //更新次數，若沒設定，會持續更新
+            //locationRequest.numUpdates = 1
+            mLocationProviderClient.requestLocationUpdates(
+                locationRequest,
+                object : LocationCallback() {
+                    override fun onLocationResult(locationResult: LocationResult?) {
+                        locationResult ?: return
+                        Log.d(
+                            "HKT",
+                            "緯度:${locationResult.lastLocation.latitude} , 經度:${locationResult.lastLocation.longitude} "
+                        )
+                    }
+                },
+                null
+            )
         } else {
             //詢問要求獲取權限
             requestLocationPermission()
