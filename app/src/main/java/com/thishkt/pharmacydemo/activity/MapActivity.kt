@@ -8,20 +8,30 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationResult
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.*
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.OnMapReadyCallback
+import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MarkerOptions
 import com.thishkt.pharmacydemo.R
 import com.thishkt.pharmacydemo.REQUEST_LOCATION_PERMISSION
 
-class MapActivity : AppCompatActivity() {
+class MapActivity : AppCompatActivity(), OnMapReadyCallback {
+
+    private var googleMap: GoogleMap? = null
+    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
 
-        getCurrentLocation()
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
+
+        val mapFragment = supportFragmentManager
+            .findFragmentById(R.id.map) as SupportMapFragment
+        mapFragment.getMapAsync(this)
     }
 
     private fun getCurrentLocation() {
@@ -51,6 +61,20 @@ class MapActivity : AppCompatActivity() {
                         Log.d(
                             "HKT",
                             "緯度:${locationResult.lastLocation.latitude} , 經度:${locationResult.lastLocation.longitude} "
+                        )
+
+                        val currentLocation =
+                            LatLng(
+                                locationResult.lastLocation.latitude,
+                                locationResult.lastLocation.longitude
+                            )
+                        googleMap?.addMarker(
+                            MarkerOptions().position(currentLocation).title("現在位置")
+                        )
+                        googleMap?.moveCamera(
+                            CameraUpdateFactory.newLatLngZoom(
+                                currentLocation, 15f
+                            )
                         )
                     }
                 },
@@ -114,5 +138,10 @@ class MapActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    override fun onMapReady(googleMap: GoogleMap) {
+        this.googleMap = googleMap
+        getCurrentLocation()
     }
 }
