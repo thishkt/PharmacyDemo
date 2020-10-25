@@ -1,6 +1,7 @@
 package com.thishkt.pharmacydemo.activity
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -14,18 +15,27 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.thishkt.pharmacydemo.R
 import com.thishkt.pharmacydemo.REQUEST_LOCATION_PERMISSION
+import com.thishkt.pharmacydemo.util.ImgUtil
+import com.thishkt.pharmacydemo.util.ImgUtil.dp
+import com.thishkt.pharmacydemo.util.ImgUtil.getBitmapDescriptor
+import com.thishkt.pharmacydemo.util.ImgUtil.px
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private var googleMap: GoogleMap? = null
+    private var currLocationMarker: Marker? = null
+
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
+    private lateinit var mContext: Context
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
+        mContext = this
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
@@ -68,9 +78,16 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                                 locationResult.lastLocation.latitude,
                                 locationResult.lastLocation.longitude
                             )
-                        googleMap?.addMarker(
+
+
+                        //googleMap?.clear()
+                        currLocationMarker?.remove()
+
+
+                        currLocationMarker =googleMap?.addMarker(
                             MarkerOptions().position(currentLocation).title("現在位置")
                         )
+
                         googleMap?.moveCamera(
                             CameraUpdateFactory.newLatLngZoom(
                                 currentLocation, 15f
@@ -85,6 +102,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             requestLocationPermission()
         }
     }
+
 
     private fun requestLocationPermission() {
         if (ActivityCompat.shouldShowRequestPermissionRationale(
