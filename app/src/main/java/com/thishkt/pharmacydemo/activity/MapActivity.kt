@@ -3,11 +3,12 @@ package com.thishkt.pharmacydemo.activity
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -19,10 +20,8 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.thishkt.pharmacydemo.R
 import com.thishkt.pharmacydemo.REQUEST_LOCATION_PERMISSION
-import com.thishkt.pharmacydemo.util.ImgUtil
-import com.thishkt.pharmacydemo.util.ImgUtil.dp
-import com.thishkt.pharmacydemo.util.ImgUtil.getBitmapDescriptor
-import com.thishkt.pharmacydemo.util.ImgUtil.px
+import com.thishkt.pharmacydemo.adapter.MyInfoWindowAdapter
+
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -31,6 +30,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var mContext: Context
+    private lateinit var currentLocation: LatLng
+
+    private val defaultLocation = LatLng(25.0338483, 121.5645283)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -73,7 +75,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                             "緯度:${locationResult.lastLocation.latitude} , 經度:${locationResult.lastLocation.longitude} "
                         )
 
-                        val currentLocation =
+                        currentLocation =
                             LatLng(
                                 locationResult.lastLocation.latitude,
                                 locationResult.lastLocation.longitude
@@ -82,11 +84,14 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
                         //googleMap?.clear()
                         currLocationMarker?.remove()
-
-
-                        currLocationMarker =googleMap?.addMarker(
-                            MarkerOptions().position(currentLocation).title("現在位置")
+                        googleMap?.setInfoWindowAdapter(MyInfoWindowAdapter(mContext))
+                        currLocationMarker = googleMap?.addMarker(
+                            MarkerOptions()
+                                .position(currentLocation)
+                                .title("現在位置")
+                                .snippet("100,66")
                         )
+                        currLocationMarker?.showInfoWindow()
 
                         googleMap?.moveCamera(
                             CameraUpdateFactory.newLatLngZoom(
@@ -161,5 +166,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         this.googleMap = googleMap
         getCurrentLocation()
+
+        googleMap.moveCamera(
+            CameraUpdateFactory.newLatLngZoom(
+                defaultLocation, 6f
+            )
+        )
     }
 }
