@@ -33,7 +33,7 @@ class MapActivity : AppCompatActivity() {
             //已獲取到權限
             Toast.makeText(this, "已獲取到位置權限，可以準備開始獲取經緯度", Toast.LENGTH_SHORT).show()
             locationPermissionGranted = true
-            //todo getDeviceLocation()
+            //todo checkGPSState()
         } else {
             //詢問要求獲取權限
             requestLocationPermission()
@@ -73,7 +73,7 @@ class MapActivity : AppCompatActivity() {
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                         //已獲取到權限
                         locationPermissionGranted = true
-                        //todo getDeviceLocation()
+                        //todo checkGPSState()
                     } else if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
                         if (!ActivityCompat.shouldShowRequestPermissionRationale(
                                 this,
