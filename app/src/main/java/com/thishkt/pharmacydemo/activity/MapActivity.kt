@@ -3,41 +3,24 @@ package com.thishkt.pharmacydemo.activity
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.Location
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import com.google.android.gms.location.*
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
 import com.thishkt.pharmacydemo.R
 import com.thishkt.pharmacydemo.REQUEST_LOCATION_PERMISSION
 
-class MapActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapActivity : AppCompatActivity() {
 
     private var locationPermissionGranted = false
-    private var googleMap: GoogleMap? = null
-    private lateinit var mFusedLocationProviderClient: FusedLocationProviderClient
-    private val defaultLocation = LatLng(25.0338483 , 121.5645283)
-    private val defaultZoom = 15
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
 
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
-
-        val mapFragment = supportFragmentManager
-            .findFragmentById(R.id.map) as SupportMapFragment
-        mapFragment.getMapAsync(this)
+        getLocationPermission()
     }
 
     private fun getLocationPermission() {
@@ -48,57 +31,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             //已獲取到權限
-            //todo 獲取經緯度
             Toast.makeText(this, "已獲取到位置權限，可以準備開始獲取經緯度", Toast.LENGTH_SHORT).show()
             locationPermissionGranted = true
-            getDeviceLocation()
+            //todo checkGPSState()
         } else {
             //詢問要求獲取權限
             requestLocationPermission()
-        }
-    }
-
-    private fun getDeviceLocation() {
-        try {
-            if (locationPermissionGranted
-            ) {
-                val locationRequest = LocationRequest()
-                locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-                //更新頻率
-                locationRequest.interval = 1000
-                //更新次數，若沒設定，會持續更新
-                //locationRequest.numUpdates = 1
-                mFusedLocationProviderClient.requestLocationUpdates(
-                    locationRequest,
-                    object : LocationCallback() {
-                        override fun onLocationResult(locationResult: LocationResult?) {
-                            locationResult ?: return
-                            Log.d(
-                                "HKT",
-                                "緯度:${locationResult.lastLocation.latitude} , 經度:${locationResult.lastLocation.longitude} "
-                            )
-
-                            googleMap?.moveCamera(
-                                CameraUpdateFactory.newLatLngZoom(
-                                    LatLng(
-                                        locationResult.lastLocation.latitude,
-                                        locationResult.lastLocation.longitude
-                                    ), defaultZoom.toFloat()
-                                )
-                            )
-
-                            googleMap?.isMyLocationEnabled = true
-//                            googleMap?.uiSettings?.isMyLocationButtonEnabled = true
-
-                        }
-                    },
-                    null
-                )
-            } else {
-                getLocationPermission()
-            }
-        } catch (e: SecurityException) {
-            Log.e("Exception: %s", e.message, e)
         }
     }
 
@@ -135,7 +73,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                         //已獲取到權限
                         locationPermissionGranted = true
-                        getDeviceLocation()
+                        //todo checkGPSState()
                     } else if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
                         if (!ActivityCompat.shouldShowRequestPermissionRationale(
                                 this,
@@ -172,13 +110,5 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 getLocationPermission()
             }
         }
-    }
-
-    override fun onMapReady(googleMap: GoogleMap) {
-        this.googleMap = googleMap
-
-        getLocationPermission()
-
-//        getDeviceLocation()
     }
 }
