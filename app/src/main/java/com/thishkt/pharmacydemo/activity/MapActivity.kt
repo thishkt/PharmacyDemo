@@ -1,8 +1,11 @@
 package com.thishkt.pharmacydemo.activity
 
 import android.Manifest
+import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
@@ -10,16 +13,20 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.thishkt.pharmacydemo.R
+import com.thishkt.pharmacydemo.REQUEST_ENABLE_GPS
 import com.thishkt.pharmacydemo.REQUEST_LOCATION_PERMISSION
+
 
 class MapActivity : AppCompatActivity() {
 
     private var locationPermissionGranted = false
+    private lateinit var mContext: Context
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
-
+        mContext = this
         getLocationPermission()
     }
 
@@ -31,12 +38,32 @@ class MapActivity : AppCompatActivity() {
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             //已獲取到權限
-            Toast.makeText(this, "已獲取到位置權限，可以準備開始獲取經緯度", Toast.LENGTH_SHORT).show()
+            //todo 獲取經緯度
             locationPermissionGranted = true
-            //todo checkGPSState()
+            checkGPSState()
         } else {
             //詢問要求獲取權限
             requestLocationPermission()
+        }
+    }
+
+    private fun checkGPSState() {
+        val locationManager = mContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            AlertDialog.Builder(mContext)
+                .setTitle("GPS 尚未開啟")
+                .setMessage("使用此功能需要開啟 GSP 定位功能")
+                .setPositiveButton("前往開啟",
+                    DialogInterface.OnClickListener { _, _ ->
+                        startActivityForResult(
+                            Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), REQUEST_ENABLE_GPS
+                        )
+                    })
+                .setNegativeButton("取消", null)
+                .show()
+        } else {
+            //todo getDeviceLocation()
+            Toast.makeText(this, "已獲取到位置權限且GPS已開啟，可以準備開始獲取經緯度", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -73,7 +100,7 @@ class MapActivity : AppCompatActivity() {
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                         //已獲取到權限
                         locationPermissionGranted = true
-                        //todo checkGPSState()
+                        checkGPSState()
                     } else if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
                         if (!ActivityCompat.shouldShowRequestPermissionRationale(
                                 this,
@@ -108,6 +135,9 @@ class MapActivity : AppCompatActivity() {
         when (requestCode) {
             REQUEST_LOCATION_PERMISSION -> {
                 getLocationPermission()
+            }
+            REQUEST_ENABLE_GPS -> {
+                checkGPSState()
             }
         }
     }
