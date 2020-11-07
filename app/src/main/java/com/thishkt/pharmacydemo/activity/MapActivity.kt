@@ -1,9 +1,11 @@
 package com.thishkt.pharmacydemo.activity
 
 import android.Manifest
+import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.Location
+import android.location.LocationManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings
@@ -17,22 +19,25 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.thishkt.pharmacydemo.R
+import com.thishkt.pharmacydemo.REQUEST_ENABLE_GPS
 import com.thishkt.pharmacydemo.REQUEST_LOCATION_PERMISSION
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback {
-
     private var locationPermissionGranted = false
+    private var mCurrLocationMarker: Marker? = null
+
+    private lateinit var mContext: Context
     private var googleMap: GoogleMap? = null
     private lateinit var mFusedLocationProviderClient: FusedLocationProviderClient
-    private val defaultLocation = LatLng(25.0338483 , 121.5645283)
-    private val defaultZoom = 15
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_map)
 
+        mContext = this
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
         val mapFragment = supportFragmentManager
@@ -48,13 +53,31 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             //已獲取到權限
-            //todo 獲取經緯度
-            Toast.makeText(this, "已獲取到位置權限，可以準備開始獲取經緯度", Toast.LENGTH_SHORT).show()
             locationPermissionGranted = true
-            getDeviceLocation()
+            checkGPSState()
         } else {
             //詢問要求獲取權限
             requestLocationPermission()
+        }
+    }
+
+    private fun checkGPSState() {
+        val locationManager = mContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            AlertDialog.Builder(mContext)
+                .setTitle("GPS 尚未開啟")
+                .setMessage("使用此功能需要開啟 GSP 定位功能")
+                .setPositiveButton("前往開啟",
+                    DialogInterface.OnClickListener { _, _ ->
+                        startActivityForResult(
+                            Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), REQUEST_ENABLE_GPS
+                        )
+                    })
+                .setNegativeButton("取消", null)
+                .show()
+        } else {
+            Toast.makeText(this, "已獲取到位置權限且GPS已開啟，可以準備開始獲取經緯度", Toast.LENGTH_SHORT).show()
+            getDeviceLocation()
         }
     }
 
@@ -78,22 +101,37 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                                 "緯度:${locationResult.lastLocation.latitude} , 經度:${locationResult.lastLocation.longitude} "
                             )
 
-                            googleMap?.moveCamera(
-                                CameraUpdateFactory.newLatLngZoom(
-                                    LatLng(
-                                        locationResult.lastLocation.latitude,
-                                        locationResult.lastLocation.longitude
-                                    ), defaultZoom.toFloat()
+
+                            val currentLocation =
+                                LatLng(
+                                    locationResult.lastLocation.latitude,
+                                    locationResult.lastLocation.longitude
                                 )
-                            )
+
+                            //清除所有標記
+                            //googleMap?.clear()
+
+                            //清除上一次位置標記
+                            //mCurrLocationMarker?.remove()
+
+                            //當下位置存到一個 Marker 變數中，好讓下一次可以清除
+//                            mCurrLocationMarker =googleMap?.addMarker(
+//                                MarkerOptions().position(currentLocation).title("現在位置")
+//                            )
 
                             googleMap?.isMyLocationEnabled = true
-//                            googleMap?.uiSettings?.isMyLocationButtonEnabled = true
 
+
+                            googleMap?.moveCamera(
+                                CameraUpdateFactory.newLatLngZoom(
+                                    currentLocation, 15f
+                                )
+                            )
                         }
                     },
                     null
                 )
+
             } else {
                 getLocationPermission()
             }
@@ -108,7 +146,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             )
         ) {
             AlertDialog.Builder(this)
-                .setMessage("此應用程式，需要位置權限才能正常使用")
+                .setMessage("需要位置權限")
                 .setPositiveButton("確定") { _, _ ->
                     ActivityCompat.requestPermissions(
                         this, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
@@ -135,7 +173,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                         //已獲取到權限
                         locationPermissionGranted = true
-                        getDeviceLocation()
+                        checkGPSState()
                     } else if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
                         if (!ActivityCompat.shouldShowRequestPermissionRationale(
                                 this,
@@ -171,14 +209,14 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             REQUEST_LOCATION_PERMISSION -> {
                 getLocationPermission()
             }
+            REQUEST_ENABLE_GPS -> {
+                checkGPSState()
+            }
         }
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
         this.googleMap = googleMap
-
         getLocationPermission()
-
-//        getDeviceLocation()
     }
 }
