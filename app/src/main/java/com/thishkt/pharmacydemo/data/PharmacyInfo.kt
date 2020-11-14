@@ -10,7 +10,9 @@ class PharmacyInfo(
 
 class Feature(
     @SerializedName("properties")
-    val property: Property
+    val property: Property,
+    @SerializedName("geometry")
+    val geometry: Geometry
 ) : Serializable
 
 class Property(
@@ -37,3 +39,8 @@ class Property(
 
 
 ) : Serializable
+
+class Geometry(
+    @SerializedName("coordinates")
+    val coordinates: List<Double>
+): Serializable

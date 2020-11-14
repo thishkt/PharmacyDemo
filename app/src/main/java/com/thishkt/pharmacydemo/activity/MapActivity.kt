@@ -6,12 +6,13 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationManager
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -21,18 +22,27 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.gson.Gson
+import com.thishkt.pharmacydemo.PHARMACIES_DATA_URL
 import com.thishkt.pharmacydemo.R
 import com.thishkt.pharmacydemo.REQUEST_ENABLE_GPS
 import com.thishkt.pharmacydemo.REQUEST_LOCATION_PERMISSION
 import com.thishkt.pharmacydemo.adapter.MyInfoWindowAdapter
+import com.thishkt.pharmacydemo.data.PharmacyInfo
+import com.thishkt.pharmacydemo.util.OkHttpUtil
+import kotlinx.android.synthetic.main.activity_main.*
+import okhttp3.Response
 
-class MapActivity : AppCompatActivity(), OnMapReadyCallback {
+class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener {
     private var locationPermissionGranted = false
     private var mCurrLocationMarker: Marker? = null
+
+    private var pharmacyInfo: PharmacyInfo? = null
 
     private lateinit var mContext: Context
     private var googleMap: GoogleMap? = null
     private lateinit var mFusedLocationProviderClient: FusedLocationProviderClient
+
     //台北101
     private val defaultLocation = LatLng(25.0338483, 121.5645283)
 
@@ -46,6 +56,37 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
+        getPharmacyData()
+    }
+
+    private fun getPharmacyData() {
+        //顯示忙碌圈圈
+        progressBar.visibility = View.VISIBLE
+
+        OkHttpUtil.mOkHttpUtil.getAsync(PHARMACIES_DATA_URL, object : OkHttpUtil.ICallback {
+            override fun onResponse(response: Response) {
+                val pharmaciesData = response.body?.string()
+
+                Log.d("QQQ", "pharmaciesData:$pharmaciesData")
+
+                pharmacyInfo = Gson().fromJson(pharmaciesData, PharmacyInfo::class.java)
+
+                runOnUiThread {
+                    //關閉忙碌圈圈
+                    progressBar.visibility = View.GONE
+                    addAllMaker()
+                }
+
+            }
+
+            override fun onFailure(e: okio.IOException) {
+                Log.d("HKT", "onFailure: $e")
+
+                //關閉忙碌圈圈
+                progressBar.visibility = View.GONE
+            }
+        })
     }
 
     private fun getLocationPermission() {
@@ -105,11 +146,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                             )
 
 
-                            val currentLocation =
-                                LatLng(
-                                    locationResult.lastLocation.latitude,
-                                    locationResult.lastLocation.longitude
-                                )
+//                            val currentLocation =
+//                                LatLng(
+//                                    locationResult.lastLocation.latitude,
+//                                    locationResult.lastLocation.longitude
+//                                )
 
                             //清除所有標記
                             //googleMap?.clear()
@@ -124,22 +165,22 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
 //                            googleMap?.isMyLocationEnabled = true
 
-
-                            mCurrLocationMarker?.remove()
-                            googleMap?.setInfoWindowAdapter(MyInfoWindowAdapter(mContext))
-                            mCurrLocationMarker = googleMap?.addMarker(
-                                MarkerOptions()
-                                    .position(currentLocation)
-                                    .title("現在位置")
-                                    .snippet("100,66")
-                            )
-                            mCurrLocationMarker?.showInfoWindow()
-
-                            googleMap?.moveCamera(
-                                CameraUpdateFactory.newLatLngZoom(
-                                    currentLocation, 15f
-                                )
-                            )
+//
+//                            mCurrLocationMarker?.remove()
+//                            googleMap?.setInfoWindowAdapter(MyInfoWindowAdapter(mContext))
+//                            mCurrLocationMarker = googleMap?.addMarker(
+//                                MarkerOptions()
+//                                    .position(currentLocation)
+//                                    .title("現在位置")
+//                                    .snippet("100,66")
+//                            )
+//                            mCurrLocationMarker?.showInfoWindow()
+//
+//                            googleMap?.moveCamera(
+//                                CameraUpdateFactory.newLatLngZoom(
+//                                    currentLocation, 15f
+//                                )
+//                            )
                         }
                     },
                     null
@@ -235,6 +276,48 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 defaultLocation, 15f
             )
         )
-        getLocationPermission()
+        googleMap?.setInfoWindowAdapter(MyInfoWindowAdapter(mContext))
+        googleMap?.setOnInfoWindowClickListener(this)
+
+//        getLocationPermission()
+    }
+
+    private fun addAllMaker() {
+        pharmacyInfo?.features?.forEach { feature ->
+            val pinMarker = googleMap?.addMarker(
+                MarkerOptions()
+                    .position(
+                        LatLng(
+                            feature.geometry.coordinates[1],
+                            feature.geometry.coordinates[0],
+                        )
+                    )
+                    .title(feature.property.name)
+                    .snippet(
+                        "${feature.property.mask_adult}," +
+                                "${feature.property.mask_child}"
+                    )
+            )
+        }
+
+    }
+
+    override fun onInfoWindowClick(marker: Marker?) {
+        marker?.title?.let { title ->
+//            Log.d("HKT", title)
+
+            val filterData =
+                pharmacyInfo?.features?.filter {
+                    it.property.name == (title)
+                }
+
+            if (filterData?.size!! > 0) {
+                val intent = Intent(this, PharmacyDetailActivity::class.java)
+                intent.putExtra("data", filterData.first())
+                startActivity(intent)
+            } else {
+                Log.d("HKT", "查無資料")
+            }
+        }
     }
 }
