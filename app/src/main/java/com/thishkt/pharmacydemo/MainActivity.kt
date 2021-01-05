@@ -3,18 +3,25 @@ package com.thishkt.pharmacydemo
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import android.widget.ProgressBar
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import com.thishkt.pharmacydemo.data.PharmacyInfo
-import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.*
 import org.json.JSONArray
 import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
+    lateinit var tv_pharmacies_data: TextView
+    lateinit var progressBar: ProgressBar
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        tv_pharmacies_data = findViewById(R.id.tv_pharmacies_data)
+        progressBar = findViewById(R.id.progressBar)
 
         getPharmacyData()
 
