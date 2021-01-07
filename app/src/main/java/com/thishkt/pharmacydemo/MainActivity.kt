@@ -3,15 +3,20 @@ package com.thishkt.pharmacydemo
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import kotlinx.android.synthetic.main.activity_main.*
+import com.thishkt.pharmacydemo.databinding.ActivityMainBinding
 import okhttp3.*
 import org.json.JSONArray
 import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+//        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         getPharmacyData()
 
@@ -62,7 +67,7 @@ class MainActivity : AppCompatActivity() {
 
                 runOnUiThread {
                     //最後取得所有藥局名稱資料，指定顯示到 TextView 元件中
-                    tv_pharmacies_data.text = propertiesName
+                    binding.tvPharmaciesData.text = propertiesName
                 }
             }
         })
