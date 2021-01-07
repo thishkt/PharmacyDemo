@@ -3,13 +3,18 @@ package com.thishkt.pharmacydemo
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import kotlinx.android.synthetic.main.activity_main.*
+import com.thishkt.pharmacydemo.databinding.ActivityMainBinding
 import okhttp3.*
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+//        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         getPharmacyData()
 
@@ -40,7 +45,7 @@ class MainActivity : AppCompatActivity() {
 
                 runOnUiThread{
                     //將 Okhttp 獲取到的回應值，指定到畫面的 TextView 元件中
-                    tv_pharmacies_data.text = pharmaciesData
+                    binding.tvPharmaciesData.text= pharmaciesData
                 }
             }
         })
