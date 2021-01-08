@@ -8,20 +8,20 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.gson.Gson
 import com.thishkt.pharmacydemo.data.PharmacyInfo
+import com.thishkt.pharmacydemo.databinding.ActivityMainBinding
 import okhttp3.*
 import org.json.JSONArray
 import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
-    lateinit var tv_pharmacies_data: TextView
-    lateinit var progressBar: ProgressBar
+
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        tv_pharmacies_data = findViewById(R.id.tv_pharmacies_data)
-        progressBar = findViewById(R.id.progressBar)
+        //setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         getPharmacyData()
 
@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun getPharmacyData() {
         //顯示忙碌圈圈
-        progressBar.visibility = View.VISIBLE
+        binding.progressBar.visibility = View.VISIBLE
 
         //口罩資料網址
         val pharmaciesDataUrl =
@@ -49,8 +49,10 @@ class MainActivity : AppCompatActivity() {
             override fun onFailure(call: Call, e: java.io.IOException) {
                 Log.d("HKT", "onFailure: $e")
 
-                //關閉忙碌圈圈
-                progressBar.visibility = View.GONE
+                runOnUiThread {
+                    //關閉忙碌圈圈
+                    binding.progressBar.visibility = View.GONE
+                }
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -71,10 +73,10 @@ class MainActivity : AppCompatActivity() {
 
                 runOnUiThread {
                     //最後取得所有藥局名稱資料，指定顯示到 TextView 元件中
-                    tv_pharmacies_data.text = propertiesName
+                    binding.tvPharmaciesData.text = propertiesName
 
                     //關閉忙碌圈圈
-                    progressBar.visibility = View.GONE
+                    binding.progressBar.visibility = View.GONE
                 }
 
             }
