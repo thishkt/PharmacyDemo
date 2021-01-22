@@ -23,7 +23,7 @@ class MainAdapter :
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        holder.itemViewBinding.tvName.text = pharmacyList[position].property.name
+        holder.itemViewBinding.tvName.text = pharmacyList[position].properties.name
     }
 
     override fun getItemCount(): Int {
