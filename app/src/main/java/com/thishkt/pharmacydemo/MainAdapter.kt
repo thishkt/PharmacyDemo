@@ -1,11 +1,10 @@
 package com.thishkt.pharmacydemo
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.thishkt.pharmacydemo.data.Feature
+import com.thishkt.pharmacydemo.databinding.ItemViewBinding
 
 
 class MainAdapter :
@@ -18,26 +17,23 @@ class MainAdapter :
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
-        val itemView = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_view, parent, false)
-
-        return MyViewHolder(itemView)
+        val itemViewBinding =
+            ItemViewBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return MyViewHolder(itemViewBinding)
     }
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        holder.tvName.text = pharmacyList[position].property.name
-        holder.tvAdultAmount.text = pharmacyList[position].property.mask_adult
-        holder.tvChildAmount.text = pharmacyList[position].property.mask_child
+        holder.itemViewBinding.tvName.text = pharmacyList[position].properties.name
+
+        holder.itemViewBinding.tvAdultAmount.text = pharmacyList[position].properties.mask_adult.toString()
+        holder.itemViewBinding.tvChildAmount.text = pharmacyList[position].properties.mask_child.toString()
     }
 
     override fun getItemCount(): Int {
         return pharmacyList.size
     }
 
-    class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val tvName: TextView = itemView.findViewById(R.id.tv_name)
-        val tvAdultAmount: TextView = itemView.findViewById(R.id.tv_adult_amount)
-        val tvChildAmount: TextView = itemView.findViewById(R.id.tv_child_amount)
-    }
+    class MyViewHolder(val itemViewBinding: ItemViewBinding) :
+        RecyclerView.ViewHolder(itemViewBinding.root)
 
 }

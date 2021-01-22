@@ -11,25 +11,26 @@ import com.google.gson.Gson
 import com.thishkt.pharmacydemo.Util.OkHttpUtil
 import com.thishkt.pharmacydemo.Util.OkHttpUtil.Companion.mOkHttpUtil
 import com.thishkt.pharmacydemo.data.PharmacyInfo
-import kotlinx.android.synthetic.main.activity_main.*
+import com.thishkt.pharmacydemo.databinding.ActivityMainBinding
 import okhttp3.*
-import org.json.JSONArray
-import org.json.JSONObject
 
 class MainActivity : AppCompatActivity() {
 
     //定義全域變數
     private lateinit var viewAdapter: MainAdapter
     private lateinit var viewManager: RecyclerView.LayoutManager
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
         initView()
 
         getPharmacyData()
-
     }
 
     private fun initView() {
@@ -40,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         viewAdapter = MainAdapter()
 
         // 定義從佈局當中，拿到 recycler_view 元件，
-        recycler_view.apply {
+        binding.recyclerView.apply {
             // 透過 kotlin 的 apply 語法糖，設定 LayoutManager 和 Adapter
             layoutManager = viewManager
             adapter = viewAdapter
@@ -56,7 +57,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun getPharmacyData() {
         //顯示忙碌圈圈
-        progressBar.visibility = View.VISIBLE
+        binding.progressBar.visibility = View.VISIBLE
 
         mOkHttpUtil.getAsync(PHARMACIES_DATA_URL, object : OkHttpUtil.ICallback {
             override fun onResponse(response: Response) {
@@ -69,15 +70,17 @@ class MainActivity : AppCompatActivity() {
                     viewAdapter.pharmacyList = pharmacyInfo.features
 
                     //關閉忙碌圈圈
-                    progressBar.visibility = View.GONE
+                    binding.progressBar.visibility = View.GONE
                 }
             }
 
             override fun onFailure(e: okio.IOException) {
                 Log.d("HKT", "onFailure: $e")
 
-                //關閉忙碌圈圈
-                progressBar.visibility = View.GONE
+                runOnUiThread {
+                    //關閉忙碌圈圈
+                    binding.progressBar.visibility = View.GONE
+                }
             }
         })
     }
