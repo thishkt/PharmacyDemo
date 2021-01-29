@@ -24,6 +24,8 @@ class MainAdapter :
 
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
         holder.itemViewBinding.tvName.text = pharmacyList[position].properties.name
+        holder.itemViewBinding.tvAdultAmount.text = pharmacyList[position].properties.mask_adult.toString()
+        holder.itemViewBinding.tvChildAmount.text = pharmacyList[position].properties.mask_child.toString()
     }
 
     override fun getItemCount(): Int {
