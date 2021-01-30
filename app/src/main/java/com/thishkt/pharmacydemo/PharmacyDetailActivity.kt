@@ -1,38 +1,39 @@
 package com.thishkt.pharmacydemo
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.thishkt.pharmacydemo.data.Feature
-import kotlinx.android.synthetic.main.activity_pharmacy_detail.*
+import com.thishkt.pharmacydemo.databinding.ActivityPharmacyDetailBinding
 
 
 class PharmacyDetailActivity : AppCompatActivity() {
 
     private val data by lazy { intent.getSerializableExtra("data") as? Feature }
 
-    private val name by lazy { data?.property?.name }
-    private val maskAdultAmount by lazy { data?.property?.mask_adult }
-    private val maskChildAmount by lazy { data?.property?.mask_child }
-    private val phone by lazy { data?.property?.phone }
-    private val address by lazy { data?.property?.address }
+    private val name by lazy { data?.properties?.name }
+    private val maskAdultAmount by lazy { data?.properties?.mask_adult }
+    private val maskChildAmount by lazy { data?.properties?.mask_child }
+    private val phone by lazy { data?.properties?.phone }
+    private val address by lazy { data?.properties?.address }
 
+    private lateinit var binding: ActivityPharmacyDetailBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_pharmacy_detail)
+//        setContentView(R.layout.activity_pharmacy_detail)
+
+        binding = ActivityPharmacyDetailBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         initView()
 
     }
 
     private fun initView() {
-        tv_name.text = name ?: "資料發生錯誤"
-        tv_adult_amount.text = maskAdultAmount
-        tv_child_amount.text = maskChildAmount
-        tv_phone.text = phone
-        tv_address.text = address
+        binding.tvName.text = name ?: "資料發生錯誤"
+        binding.tvAdultAmount.text = maskAdultAmount.toString()
+        binding.tvChildAmount.text = maskChildAmount.toString()
+        binding.tvPhone.text = phone
+        binding.tvAddress.text = address
     }
 }
