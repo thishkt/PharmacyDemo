@@ -29,11 +29,13 @@ import com.thishkt.pharmacydemo.REQUEST_ENABLE_GPS
 import com.thishkt.pharmacydemo.REQUEST_LOCATION_PERMISSION
 import com.thishkt.pharmacydemo.adapter.MyInfoWindowAdapter
 import com.thishkt.pharmacydemo.data.PharmacyInfo
+import com.thishkt.pharmacydemo.databinding.ActivityMapBinding
 import com.thishkt.pharmacydemo.util.OkHttpUtil
-import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.Response
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWindowClickListener {
+    private lateinit var binding: ActivityMapBinding
+
     private var locationPermissionGranted = false
     private var mCurrLocationMarker: Marker? = null
 
@@ -48,7 +50,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWin
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_map)
+//        setContentView(R.layout.activity_map)
+        binding = ActivityMapBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         mContext = this
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
@@ -62,7 +66,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWin
 
     private fun getPharmacyData() {
         //顯示忙碌圈圈
-        progressBar.visibility = View.VISIBLE
+        binding.progressBar.visibility = View.VISIBLE
 
         OkHttpUtil.mOkHttpUtil.getAsync(PHARMACIES_DATA_URL, object : OkHttpUtil.ICallback {
             override fun onResponse(response: Response) {
@@ -74,7 +78,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWin
 
                 runOnUiThread {
                     //關閉忙碌圈圈
-                    progressBar.visibility = View.GONE
+                    binding.progressBar.visibility = View.GONE
                     addAllMaker()
                 }
 
@@ -84,7 +88,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWin
                 Log.d("HKT", "onFailure: $e")
 
                 //關閉忙碌圈圈
-                progressBar.visibility = View.GONE
+                binding.progressBar.visibility = View.GONE
             }
         })
     }
@@ -292,10 +296,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWin
                             feature.geometry.coordinates[0],
                         )
                     )
-                    .title(feature.property.name)
+                    .title(feature.properties.name)
                     .snippet(
-                        "${feature.property.mask_adult}," +
-                                "${feature.property.mask_child}"
+                        "${feature.properties.mask_adult}," +
+                                "${feature.properties.mask_child}"
                     )
             )
         }
@@ -308,7 +312,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnInfoWin
 
             val filterData =
                 pharmacyInfo?.features?.filter {
-                    it.property.name == (title)
+                    it.properties.name == (title)
                 }
 
             if (filterData?.size!! > 0) {

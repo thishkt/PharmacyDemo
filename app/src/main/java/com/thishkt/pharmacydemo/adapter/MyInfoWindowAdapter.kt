@@ -1,34 +1,31 @@
 package com.thishkt.pharmacydemo.adapter
 
-import android.app.Activity
 import android.content.Context
+import android.view.LayoutInflater
 import android.view.View
-import android.widget.TextView
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.Marker
-import com.thishkt.pharmacydemo.R
+import com.thishkt.pharmacydemo.databinding.InfoWindowBinding
 
-class MyInfoWindowAdapter(context: Context) : GoogleMap.InfoWindowAdapter {
 
-    var mWindow: View = (context as Activity).layoutInflater.inflate(R.layout.info_window, null)
+class MyInfoWindowAdapter(_context: Context) : GoogleMap.InfoWindowAdapter {
 
-    private fun render(marker: Marker, view: View) {
+    private val context = _context
 
-        val tvName = view.findViewById<TextView>(R.id.tv_name)
-        val tvAdultAmount = view.findViewById<TextView>(R.id.tv_adult_amount)
-        val tvChildAmount = view.findViewById<TextView>(R.id.tv_child_amount)
-
+    private fun render(marker: Marker, infoWindowBinding: InfoWindowBinding) {
         val mask = marker.snippet.toString().split(",")
-
-        tvName.text = marker.title
-        tvAdultAmount.text = mask[0]
-        tvChildAmount.text = mask[1]
+        infoWindowBinding.tvName.text = marker.title
+        infoWindowBinding.tvAdultAmount.text = mask[0]
+        infoWindowBinding.tvChildAmount.text = mask[1]
 
     }
 
     override fun getInfoContents(marker: Marker): View {
-        render(marker, mWindow)
-        return mWindow
+        val infoWindowBinding =
+            InfoWindowBinding.inflate(context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater)
+        render(marker, infoWindowBinding)
+        return infoWindowBinding.root
+
     }
 
     override fun getInfoWindow(marker: Marker): View? {
