@@ -1,4 +1,4 @@
-package com.thishkt.pharmacydemo.util
+package com.thishkt.pharmacydemo.Util
 
 object CountyUtil {
     private val counties = listOf(
@@ -467,10 +467,9 @@ object CountyUtil {
         return towns[index]
     }
 
-
     /**
      * 獲取縣市索引值
-     * @return 返回所有縣市名稱
+     * @return 返回縣市索引值
      */
     fun getCountyIndexByName(countyName:String): Int {
         return counties.indexOf(countyName)
@@ -478,7 +477,7 @@ object CountyUtil {
 
     /**
      * 獲取鄉鎮索引值
-     * @return 返回所有縣市名稱
+     * @return 返回鄉鎮索引值
      */
     fun getTownIndexByName(countyName:String,townName:String): Int {
         val index = counties.indexOf(countyName)
