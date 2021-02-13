@@ -1,39 +1,37 @@
 package com.thishkt.pharmacydemo.data
 
-import com.google.gson.annotations.SerializedName
 import java.io.Serializable
 
-class PharmacyInfo(
-    @SerializedName("features")
-    val features: List<Feature>
-) : Serializable
+data class PharmacyInfo(
+    val features: List<Feature>,
+    val type: String
+):Serializable
 
-class Feature(
-    @SerializedName("properties")
-    val property: Property
-) : Serializable
+data class Feature(
+    val geometry: Geometry,
+    val properties: Properties,
+    val type: String
+):Serializable
 
-class Property(
-    @SerializedName("name")
-    val name: String,
+data class Geometry(
+    val coordinates: List<Double>,
+    val type: String
+):Serializable
 
-    @SerializedName("mask_adult")
-    val mask_adult: String,
-
-    @SerializedName("mask_child")
-    val mask_child: String,
-
-    @SerializedName("phone")
-    val phone: String,
-
-    @SerializedName("address")
+data class Properties(
     val address: String,
-
-    @SerializedName("county")
+    val available: String,
     val county: String,
-
-    @SerializedName("town")
-    val town: String
-
-
-) : Serializable
+    val cunli: String,
+    val custom_note: String,
+    val id: String,
+    val mask_adult: Int,
+    val mask_child: Int,
+    val name: String,
+    val note: String,
+    val phone: String,
+    val service_periods: String,
+    val town: String,
+    val updated: String,
+    val website: String
+):Serializable
