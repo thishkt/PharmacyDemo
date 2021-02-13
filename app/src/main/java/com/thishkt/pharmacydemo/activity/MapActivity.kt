@@ -14,12 +14,14 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.*
-import com.thishkt.pharmacydemo.R
 import com.thishkt.pharmacydemo.REQUEST_ENABLE_GPS
 import com.thishkt.pharmacydemo.REQUEST_LOCATION_PERMISSION
+import com.thishkt.pharmacydemo.databinding.ActivityMapBinding
 
 
 class MapActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityMapBinding
 
     private var locationPermissionGranted = false
 
@@ -29,7 +31,10 @@ class MapActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_map)
+        //        setContentView(R.layout.activity_map)
+        binding = ActivityMapBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
         mContext = this
         mLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
